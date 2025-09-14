@@ -1,175 +1,175 @@
-# План реализации оптимизации Boxo для высокой нагрузки
+# Boxo High Load Optimization Implementation Plan
 
-- [x] 1. Создание базовой инфраструктуры для адаптивной конфигурации
-  - Реализовать структуры конфигурации с динамическими параметрами
-  - Создать интерфейсы для адаптивного управления ресурсами
-  - Написать тесты для валидации конфигурационных параметров
-  - _Требования: 6.1, 6.2, 6.3_
+- [x] 1. Create basic infrastructure for adaptive configuration
+  - Implement configuration structures with dynamic parameters
+  - Create interfaces for adaptive resource management
+  - Write tests for configuration parameter validation
+  - _Requirements: 6.1, 6.2, 6.3_
 
-- [x] 2. Оптимизация Bitswap для высокой пропускной способности
-- [x] 2.1 Реализовать адаптивный менеджер соединений Bitswap
-  - Создать `AdaptiveBitswapConfig` структуру с динамическими лимитами
-  - Реализовать логику автоматического масштабирования `MaxOutstandingBytesPerPeer`
-  - Добавить мониторинг нагрузки и автоматическую адаптацию параметров
-  - Написать unit тесты для проверки адаптивного поведения
-  - _Требования: 1.1, 1.2_
+- [x] 2. Bitswap optimization for high throughput
+- [x] 2.1 Implement adaptive Bitswap connection manager
+  - Create `AdaptiveBitswapConfig` structure with dynamic limits
+  - Implement automatic scaling logic for `MaxOutstandingBytesPerPeer`
+  - Add load monitoring and automatic parameter adaptation
+  - Write unit tests to verify adaptive behavior
+  - _Requirements: 1.1, 1.2_
 
-- [x] 2.2 Создать систему приоритизации запросов
-  - Реализовать `PriorityRequestManager` с классификацией запросов
-  - Добавить очереди с приоритетами для обработки критически важных запросов
-  - Создать механизм динамического перераспределения ресурсов
-  - Написать тесты для проверки корректности приоритизации
-  - _Требования: 1.3_
+- [x] 2.2 Create request prioritization system
+  - Implement `PriorityRequestManager` with request classification
+  - Add priority queues for handling critically important requests
+  - Create dynamic resource redistribution mechanism
+  - Write tests to verify prioritization correctness
+  - _Requirements: 1.3_
 
-- [x] 2.3 Реализовать батчевую обработку запросов
-  - Создать `BatchRequestProcessor` для группировки запросов
-  - Добавить логику оптимального размера батча и таймаутов
-  - Реализовать параллельную обработку батчей с использованием worker pools
-  - Написать бенчмарки для измерения производительности батчевой обработки
-  - _Требования: 1.1, 1.2_
+- [x] 2.3 Implement batch request processing
+  - Create `BatchRequestProcessor` for request grouping
+  - Add optimal batch size and timeout logic
+  - Implement parallel batch processing using worker pools
+  - Write benchmarks to measure batch processing performance
+  - _Requirements: 1.1, 1.2_
 
-- [x] 2.4 Добавить Circuit Breaker для защиты от перегрузки
-  - Реализовать паттерн Circuit Breaker для Bitswap операций
-  - Добавить мониторинг состояния здоровья соединений
-  - Создать механизм постепенного восстановления после сбоев
-  - Написать интеграционные тесты для проверки отказоустойчивости
-  - _Требования: 7.1, 7.3_
+- [x] 2.4 Add Circuit Breaker for overload protection
+  - Implement Circuit Breaker pattern for Bitswap operations
+  - Add connection health monitoring
+  - Create gradual recovery mechanism after failures
+  - Write integration tests to verify fault tolerance
+  - _Requirements: 7.1, 7.3_
 
-- [x] 3. Оптимизация блочного хранилища для массовых операций
-- [x] 3.1 Создать многоуровневую систему кэширования
-  - Реализовать `MultiTierBlockstore` интерфейс с поддержкой Memory/SSD/HDD уровней
-  - Добавить LRU-алгоритм с учетом частоты доступа для каждого уровня
-  - Создать механизм автоматического перемещения данных между уровнями
-  - Написать тесты для проверки корректности кэширования
-  - _Требования: 2.4_
+- [x] 3. Blockstore optimization for bulk operations
+- [x] 3.1 Create multi-tier caching system
+  - Implement `MultiTierBlockstore` interface with Memory/SSD/HDD tier support
+  - Add LRU algorithm with access frequency consideration for each tier
+  - Create automatic data movement mechanism between tiers
+  - Write tests to verify caching correctness
+  - _Requirements: 2.4_
 
-- [x] 3.2 Реализовать батчевые операции I/O
-  - Создать `BatchIOManager` для группировки операций чтения/записи
-  - Добавить асинхронную обработку с использованием goroutines
-  - Реализовать транзакционные операции для обеспечения консистентности
-  - Написать бенчмарки для измерения производительности батчевых операций
-  - _Требования: 2.1, 2.2_
+- [x] 3.2 Implement batch I/O operations
+  - Create `BatchIOManager` for grouping read/write operations
+  - Add asynchronous processing using goroutines
+  - Implement transactional operations for consistency assurance
+  - Write benchmarks to measure batch operation performance
+  - _Requirements: 2.1, 2.2_
 
-- [x] 3.3 Добавить потоковую обработку больших блоков
-  - Реализовать `StreamingHandler` для блоков размером > 1MB
-  - Добавить поддержку сжатия данных для экономии места
-  - Создать механизм чанкинга для оптимальной обработки больших файлов
-  - Написать тесты для проверки корректности потоковой обработки
-  - _Требования: 2.3_
+- [x] 3.3 Add streaming processing for large blocks
+  - Implement `StreamingHandler` for blocks > 1MB in size
+  - Add data compression support for space efficiency
+  - Create chunking mechanism for optimal large file processing
+  - Write tests to verify streaming processing correctness
+  - _Requirements: 2.3_
 
-- [x] 3.4 Оптимизировать управление памятью блочного хранилища
-  - Добавить мониторинг использования памяти в реальном времени
-  - Реализовать механизм graceful degradation при нехватке памяти
-  - Создать автоматическую очистку кэша при достижении лимитов
-  - Написать тесты для проверки отсутствия утечек памяти
-  - _Требования: 5.1, 5.2, 5.4_
+- [x] 3.4 Optimize blockstore memory management
+  - Add real-time memory usage monitoring
+  - Implement graceful degradation mechanism during memory shortage
+  - Create automatic cache cleanup when limits are reached
+  - Write tests to verify absence of memory leaks
+  - _Requirements: 5.1, 5.2, 5.4_
 
-- [-] 4. Оптимизация сетевого слоя для кластерной среды
-- [x] 4.1 Создать адаптивный менеджер соединений
-  - Реализовать `AdaptiveConnManager` с динамическими лимитами HighWater/LowWater
-  - Добавить автоматическую настройку GracePeriod на основе нагрузки
-  - Создать пулы постоянных соединений для узлов кластера
-  - Написать тесты для проверки корректности управления соединениями
-  - _Требования: 3.1_
+- [-] 4. Network layer optimization for cluster environment
+- [x] 4.1 Create adaptive connection manager
+  - Implement `AdaptiveConnManager` with dynamic HighWater/LowWater limits
+  - Add automatic GracePeriod adjustment based on load
+  - Create persistent connection pools for cluster nodes
+  - Write tests to verify connection management correctness
+  - _Requirements: 3.1_
 
-- [x] 4.2 Реализовать мониторинг качества соединений
-  - Создать `ConnectionQuality` структуру для отслеживания метрик соединений
-  - Добавить измерение латентности, пропускной способности и частоты ошибок
-  - Реализовать автоматическое переключение на альтернативные маршруты
-  - Написать тесты для проверки корректности мониторинга
-  - _Требования: 3.2_
+- [x] 4.2 Implement connection quality monitoring
+  - Create `ConnectionQuality` structure for tracking connection metrics
+  - Add latency, bandwidth, and error rate measurement
+  - Implement automatic switching to alternative routes
+  - Write tests to verify monitoring correctness
+  - _Requirements: 3.2_
 
-- [x] 4.3 Оптимизировать буферизацию и keep-alive
-  - Реализовать адаптивную настройку размеров буферов на основе пропускной способности
-  - Добавить интеллектуальное управление keep-alive соединениями
-  - Создать механизм обнаружения и обхода медленных соединений
-  - Написать бенчмарки для измерения сетевой производительности
-  - _Требования: 3.3, 3.4_
+- [x] 4.3 Optimize buffering and keep-alive
+  - Implement adaptive buffer size adjustment based on throughput
+  - Add intelligent keep-alive connection management
+  - Create mechanism for detecting and bypassing slow connections
+  - Write benchmarks to measure network performance
+  - _Requirements: 3.3, 3.4_
 
-- [-] 5. Система мониторинга и метрик производительности
-- [x] 5.1 Создать сборщик метрик производительности
-  - Реализовать `PerformanceMonitor` интерфейс для сбора метрик
-  - Добавить экспорт метрик в формате Prometheus
-  - Создать структуры для хранения метрик Bitswap, Blockstore и Network
-  - Написать тесты для проверки корректности сбора метрик
-  - _Требования: 4.1_
+- [-] 5. Performance monitoring and metrics system
+- [x] 5.1 Create performance metrics collector
+  - Implement `PerformanceMonitor` interface for metrics collection
+  - Add Prometheus format metrics export
+  - Create structures for storing Bitswap, Blockstore and Network metrics
+  - Write tests to verify metrics collection correctness
+  - _Requirements: 4.1_
 
-- [x] 5.2 Реализовать анализатор узких мест
-  - Создать `BottleneckAnalyzer` для автоматического выявления проблем производительности
-  - Добавить алгоритмы анализа трендов и аномалий в метриках
-  - Реализовать систему рекомендаций по оптимизации
-  - Написать тесты для проверки корректности анализа
-  - _Требования: 4.2_
+- [x] 5.2 Implement bottleneck analyzer
+  - Create `BottleneckAnalyzer` for automatic performance problem detection
+  - Add trend and anomaly analysis algorithms for metrics
+  - Implement optimization recommendation system
+  - Write tests to verify analysis correctness
+  - _Requirements: 4.2_
 
-- [x] 5.3 Добавить систему алертов и уведомлений
-  - Реализовать `AlertManager` для генерации алертов при деградации производительности
-  - Добавить структурированное логирование с контекстом для отладки
-  - Создать механизм трассировки запросов при превышении SLA
-  - Написать интеграционные тесты для проверки системы алертов
-  - _Требования: 4.2, 4.3_
+- [x] 5.3 Add alert and notification system
+  - Implement `AlertManager` for generating alerts during performance degradation
+  - Add structured logging with context for debugging
+  - Create request tracing mechanism when SLA is exceeded
+  - Write integration tests to verify alert system
+  - _Requirements: 4.2, 4.3_
 
-- [x] 5.4 Создать автоматический тюнер параметров
-  - Реализовать `AutoTuner` для динамической оптимизации конфигурации
-  - Добавить машинное обучение для предсказания оптимальных параметров
-  - Создать механизм безопасного применения изменений конфигурации
-  - Написать тесты для проверки корректности автоматической настройки
-  - _Требования: 6.2, 6.4_
+- [x] 5.4 Create automatic parameter tuner
+  - Implement `AutoTuner` for dynamic configuration optimization
+  - Add machine learning for predicting optimal parameters
+  - Create safe configuration change application mechanism
+  - Write tests to verify automatic tuning correctness
+  - _Requirements: 6.2, 6.4_
 
-- [x] 6. Управление ресурсами и отказоустойчивость
-- [x] 6.1 Реализовать мониторинг использования ресурсов
-  - Создать `ResourceMonitor` для отслеживания CPU, памяти и дискового пространства
-  - Добавить предиктивный анализ потребления ресурсов
-  - Реализовать систему предупреждений о приближении к лимитам
-  - Написать тесты для проверки точности мониторинга ресурсов
-  - _Требования: 5.1, 5.3_
+- [x] 6. Resource management and fault tolerance
+- [x] 6.1 Implement resource usage monitoring
+  - Create `ResourceMonitor` for tracking CPU, memory and disk space
+  - Add predictive analysis of resource consumption
+  - Implement warning system for approaching limits
+  - Write tests to verify resource monitoring accuracy
+  - _Requirements: 5.1, 5.3_
 
-- [x] 6.2 Добавить механизмы graceful degradation
-  - Реализовать автоматическое снижение качества сервиса при перегрузке
-  - Добавить приоритизацию критически важных операций
-  - Создать механизм автоматического восстановления при снижении нагрузки
-  - Написать тесты для проверки корректности деградации сервиса
-  - _Требования: 5.2, 7.2_
+- [x] 6.2 Add graceful degradation mechanisms
+  - Implement automatic service quality reduction during overload
+  - Add prioritization of critically important operations
+  - Create automatic recovery mechanism when load decreases
+  - Write tests to verify service degradation correctness
+  - _Requirements: 5.2, 7.2_
 
-- [x] 6.3 Реализовать автоматическое масштабирование компонентов
-  - Создать `AutoScaler` для динамического изменения количества worker threads
-  - Добавить автоматическое управление размерами пулов соединений
-  - Реализовать механизм изоляции проблемных компонентов
-  - Написать тесты для проверки корректности масштабирования
-  - _Требования: 7.2, 7.3_
+- [x] 6.3 Implement automatic component scaling
+  - Create `AutoScaler` for dynamic worker thread count adjustment
+  - Add automatic connection pool size management
+  - Implement problematic component isolation mechanism
+  - Write tests to verify scaling correctness
+  - _Requirements: 7.2, 7.3_
 
-- [-] 7. Интеграция и тестирование производительности
-- [x] 7.1 Создать нагрузочные тесты для Bitswap
-  - Написать тесты для симуляции 10,000+ одновременных соединений
-  - Добавить тесты для проверки обработки 100,000 запросов в секунду
-  - Создать длительные тесты стабильности (24+ часа)
-  - Реализовать автоматизированные бенчмарки производительности
-  - _Требования: 1.1, 1.2_
+- [-] 7. Integration and performance testing
+- [x] 7.1 Create load tests for Bitswap
+  - Write tests to simulate 10,000+ concurrent connections
+  - Add tests to verify handling of 100,000 requests per second
+  - Create long-term stability tests (24+ hours)
+  - Implement automated performance benchmarks
+  - _Requirements: 1.1, 1.2_
 
-- [x] 7.2 Создать интеграционные тесты для кластерной среды
-  - Написать тесты для проверки взаимодействия между узлами кластера
-  - Добавить тесты для валидации метрик и алертов в кластерной среде
-  - Создать тесты для проверки отказоустойчивости кластера
-  - Реализовать автоматизированное тестирование в CI/CD pipeline
-  - _Требования: 3.1, 7.2_
+- [x] 7.2 Create integration tests for cluster environment
+  - Write tests to verify interaction between cluster nodes
+  - Add tests for metrics and alerts validation in cluster environment
+  - Create tests to verify cluster fault tolerance
+  - Implement automated testing in CI/CD pipeline
+  - _Requirements: 3.1, 7.2_
 
-- [x] 7.3 Добавить тесты отказоустойчивости
-  - Написать тесты для симуляции сбоев сети и узлов
-  - Добавить тесты для проверки восстановления после сбоев
-  - Создать тесты для валидации circuit breaker логики
-  - Реализовать chaos engineering тесты для проверки стабильности
-  - _Требования: 7.1, 7.3, 7.4_
+- [x] 7.3 Add fault tolerance tests
+  - Write tests to simulate network and node failures
+  - Add tests to verify recovery after failures
+  - Create tests to validate circuit breaker logic
+  - Implement chaos engineering tests for stability verification
+  - _Requirements: 7.1, 7.3, 7.4_
 
-- [x] 8. Документация и примеры использования
-- [x] 8.1 Создать документацию по конфигурации
-  - Написать руководство по настройке параметров для различных сценариев нагрузки
-  - Добавить примеры конфигурации для типичных кластерных развертываний
-  - Создать troubleshooting guide для решения проблем производительности
-  - Написать migration guide для обновления существующих установок
-  - _Требования: 6.1, 6.4_
+- [x] 8. Documentation and usage examples
+- [x] 8.1 Create configuration documentation
+  - Write parameter configuration guide for different load scenarios
+  - Add configuration examples for typical cluster deployments
+  - Create troubleshooting guide for performance problem resolution
+  - Write migration guide for updating existing installations
+  - _Requirements: 6.1, 6.4_
 
-- [x] 8.2 Добавить примеры интеграции с IPFS-cluster
-  - Создать example приложения, демонстрирующие оптимизированную конфигурацию
-  - Добавить docker-compose файлы для быстрого развертывания тестовой среды
-  - Написать скрипты для автоматического бенчмаркинга производительности
-  - Создать dashboard для мониторинга метрик в Grafana
-  - _Требования: 4.1, 6.2_
+- [x] 8.2 Add IPFS-cluster integration examples
+  - Create example applications demonstrating optimized configuration
+  - Add docker-compose files for quick test environment deployment
+  - Write scripts for automatic performance benchmarking
+  - Create dashboard for monitoring metrics in Grafana
+  - _Requirements: 4.1, 6.2_

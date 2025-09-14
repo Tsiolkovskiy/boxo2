@@ -1,42 +1,42 @@
-# Проект оптимизации Boxo для высокой нагрузки
+# Boxo High Load Optimization Design
 
-## Обзор
+## Overview
 
-Данный документ описывает архитектурные решения для оптимизации библиотеки Boxo под высокую нагрузку в составе IPFS-cluster. Проект направлен на повышение производительности ключевых компонентов: Bitswap, блочного хранилища, сетевого слоя и системы мониторинга.
+This document describes architectural solutions for optimizing the Boxo library for high load operation as part of an IPFS-cluster. The project aims to improve performance of key components: Bitswap, blockstore, network layer, and monitoring system.
 
-## Архитектура
+## Architecture
 
-### Текущее состояние
+### Current State
 
-Анализ кода показывает следующие текущие ограничения:
-- `BitswapMaxOutstandingBytesPerPeer = 1 << 20` (1MB) - может быть недостаточно для высокой нагрузки
-- `BitswapEngineBlockstoreWorkerCount = 128` - фиксированное количество воркеров
-- `DefaultReproviderInterval = 22 часа` - может быть слишком долго для динамичных кластеров
-- Отсутствие адаптивного управления ресурсами
+Code analysis reveals the following current limitations:
+- `BitswapMaxOutstandingBytesPerPeer = 1 << 20` (1MB) - may be insufficient for high load
+- `BitswapEngineBlockstoreWorkerCount = 128` - fixed number of workers
+- `DefaultReproviderInterval = 22 hours` - may be too long for dynamic clusters
+- Lack of adaptive resource management
 
-### Целевая архитектура
+### Target Architecture
 
 ```mermaid
 graph TB
-    subgraph "Оптимизированный Bitswap"
+    subgraph "Optimized Bitswap"
         A[Adaptive Connection Pool] --> B[Load Balancer]
         B --> C[Priority Queue Manager]
         C --> D[Batch Request Processor]
     end
     
-    subgraph "Умное блочное хранилище"
+    subgraph "Smart Blockstore"
         E[Multi-tier Cache] --> F[Batch I/O Manager]
         F --> G[Compression Engine]
         G --> H[Streaming Handler]
     end
     
-    subgraph "Сетевая оптимизация"
+    subgraph "Network Optimization"
         I[Connection Manager] --> J[Route Optimizer]
         J --> K[Bandwidth Monitor]
         K --> L[Keep-alive Manager]
     end
     
-    subgraph "Мониторинг и метрики"
+    subgraph "Monitoring and Metrics"
         M[Metrics Collector] --> N[Performance Analyzer]
         N --> O[Alert Manager]
         O --> P[Auto-tuner]
@@ -47,46 +47,46 @@ graph TB
     I --> M
 ```
 
-## Компоненты и интерфейсы
+## Components and Interfaces
 
-### 1. Адаптивный Bitswap Engine
+### 1. Adaptive Bitswap Engine
 
-#### Интерфейс AdaptiveBitswapConfig
+#### AdaptiveBitswapConfig Interface
 ```go
 type AdaptiveBitswapConfig struct {
-    // Динамические лимиты
-    MaxOutstandingBytesPerPeer int64  // Адаптивный лимит 1MB-100MB
-    MinOutstandingBytesPerPeer int64  // Минимальный лимит 256KB
+    // Dynamic limits
+    MaxOutstandingBytesPerPeer int64  // Adaptive limit 1MB-100MB
+    MinOutstandingBytesPerPeer int64  // Minimum limit 256KB
     
-    // Пулы воркеров
-    MinWorkerCount int // Минимум 128
-    MaxWorkerCount int // Максимум 2048
+    // Worker pools
+    MinWorkerCount int // Minimum 128
+    MaxWorkerCount int // Maximum 2048
     
-    // Приоритизация
+    // Prioritization
     HighPriorityThreshold time.Duration // 50ms
     CriticalPriorityThreshold time.Duration // 10ms
     
-    // Батчинг
-    BatchSize int // 100-1000 запросов
+    // Batching
+    BatchSize int // 100-1000 requests
     BatchTimeout time.Duration // 10ms
 }
 ```
 
-#### Компонент PriorityRequestManager
-- Классификация запросов по приоритету
-- Динамическое распределение ресурсов
-- Circuit breaker для защиты от перегрузки
+#### PriorityRequestManager Component
+- Request classification by priority
+- Dynamic resource allocation
+- Circuit breaker for overload protection
 
-### 2. Оптимизированное блочное хранилище
+### 2. Optimized Blockstore
 
-#### Интерфейс MultiTierBlockstore
+#### MultiTierBlockstore Interface
 ```go
 type MultiTierBlockstore interface {
-    // Многоуровневое кэширование
+    // Multi-tier caching
     GetWithTier(ctx context.Context, cid cid.Cid, tier CacheTier) (blocks.Block, error)
     PutBatch(ctx context.Context, blocks []blocks.Block) error
     
-    // Потоковая обработка
+    // Streaming processing
     GetStream(ctx context.Context, cid cid.Cid) (io.ReadCloser, error)
     PutStream(ctx context.Context, cid cid.Cid, data io.Reader) error
 }
@@ -99,23 +99,23 @@ const (
 )
 ```
 
-#### Компонент BatchIOManager
-- Группировка операций I/O
-- Асинхронная запись с подтверждением
-- Сжатие данных для экономии места
+#### BatchIOManager Component
+- I/O operation grouping
+- Asynchronous writes with acknowledgment
+- Data compression for space efficiency
 
-### 3. Сетевая оптимизация
+### 3. Network Optimization
 
-#### Интерфейс AdaptiveConnManager
+#### AdaptiveConnManager Interface
 ```go
 type AdaptiveConnManager interface {
-    // Адаптивные пулы соединений
+    // Adaptive connection pools
     SetDynamicLimits(high, low int, gracePeriod time.Duration)
     
-    // Мониторинг качества соединений
+    // Connection quality monitoring
     GetConnectionQuality(peer peer.ID) ConnectionQuality
     
-    // Автоматическое переключение маршрутов
+    // Automatic route switching
     OptimizeRoutes(ctx context.Context) error
 }
 
@@ -127,23 +127,23 @@ type ConnectionQuality struct {
 }
 ```
 
-#### Компонент NetworkOptimizer
-- Адаптивная настройка размеров буферов
-- Обнаружение и обход медленных соединений
-- Keep-alive управление
+#### NetworkOptimizer Component
+- Adaptive buffer size adjustment
+- Detection and bypass of slow connections
+- Keep-alive management
 
-### 4. Система мониторинга
+### 4. Monitoring System
 
-#### Интерфейс PerformanceMonitor
+#### PerformanceMonitor Interface
 ```go
 type PerformanceMonitor interface {
-    // Сбор метрик
+    // Metrics collection
     CollectMetrics() *PerformanceMetrics
     
-    // Анализ производительности
+    // Performance analysis
     AnalyzeBottlenecks() []Bottleneck
     
-    // Автоматическая настройка
+    // Automatic tuning
     AutoTune(ctx context.Context) error
 }
 
@@ -155,45 +155,45 @@ type PerformanceMetrics struct {
 }
 ```
 
-## Модели данных
+## Data Models
 
-### Конфигурация производительности
+### Performance Configuration
 ```go
 type HighLoadConfig struct {
-    // Bitswap настройки
+    // Bitswap settings
     Bitswap AdaptiveBitswapConfig
     
-    // Блочное хранилище
+    // Blockstore
     Blockstore BlockstoreConfig
     
-    // Сетевые настройки
+    // Network settings
     Network NetworkConfig
     
-    // Мониторинг
+    // Monitoring
     Monitoring MonitoringConfig
 }
 
 type BlockstoreConfig struct {
-    // Кэш настройки
-    MemoryCacheSize int64 // 2GB по умолчанию
-    SSDCacheSize    int64 // 50GB по умолчанию
+    // Cache settings
+    MemoryCacheSize int64 // 2GB default
+    SSDCacheSize    int64 // 50GB default
     
-    // Батчинг
-    BatchSize    int           // 1000 блоков
+    // Batching
+    BatchSize    int           // 1000 blocks
     BatchTimeout time.Duration // 100ms
     
-    // Сжатие
+    // Compression
     CompressionEnabled bool
     CompressionLevel   int // 1-9
 }
 
 type NetworkConfig struct {
-    // Менеджер соединений
+    // Connection manager
     HighWater    int           // 2000
     LowWater     int           // 1000
     GracePeriod  time.Duration // 30s
     
-    // Качество соединений
+    // Connection quality
     LatencyThreshold    time.Duration // 200ms
     BandwidthThreshold  int64         // 1MB/s
     ErrorRateThreshold  float64       // 0.05 (5%)
@@ -204,7 +204,7 @@ type NetworkConfig struct {
 }
 ```
 
-### Метрики производительности
+### Performance Metrics
 ```go
 type BitswapStats struct {
     RequestsPerSecond     float64
@@ -232,26 +232,26 @@ type NetworkStats struct {
 }
 ```
 
-## Обработка ошибок
+## Error Handling
 
-### Стратегии отказоустойчивости
+### Fault Tolerance Strategies
 
 1. **Circuit Breaker Pattern**
-   - Автоматическое отключение проблемных компонентов
-   - Постепенное восстановление нагрузки
-   - Мониторинг состояния здоровья
+   - Automatic disconnection of problematic components
+   - Gradual load recovery
+   - Health status monitoring
 
 2. **Graceful Degradation**
-   - Снижение качества сервиса при перегрузке
-   - Приоритизация критически важных операций
-   - Автоматическое масштабирование ресурсов
+   - Service quality reduction under overload
+   - Prioritization of critically important operations
+   - Automatic resource scaling
 
 3. **Retry Mechanisms**
-   - Экспоненциальная задержка повторов
-   - Джиттер для избежания thundering herd
-   - Максимальное количество попыток
+   - Exponential backoff for retries
+   - Jitter to avoid thundering herd
+   - Maximum retry attempts
 
-### Обработка специфических ошибок
+### Specific Error Handling
 
 ```go
 type ErrorHandler interface {
@@ -260,7 +260,7 @@ type ErrorHandler interface {
     HandleNetworkError(err error, conn network.Conn) error
 }
 
-// Типы ошибок
+// Error types
 var (
     ErrHighLatency     = errors.New("connection latency too high")
     ErrBandwidthLimit  = errors.New("bandwidth limit exceeded")
@@ -269,41 +269,41 @@ var (
 )
 ```
 
-## Стратегия тестирования
+## Testing Strategy
 
-### 1. Нагрузочное тестирование
-- Симуляция 10,000+ одновременных соединений
-- Тестирование пиковых нагрузок (100,000 запросов/сек)
-- Длительные тесты стабильности (24+ часа)
+### 1. Load Testing
+- Simulation of 10,000+ concurrent connections
+- Peak load testing (100,000 requests/sec)
+- Long-term stability tests (24+ hours)
 
-### 2. Интеграционное тестирование
-- Тестирование в кластерной среде
-- Проверка взаимодействия компонентов
-- Валидация метрик и алертов
+### 2. Integration Testing
+- Testing in cluster environment
+- Component interaction verification
+- Metrics and alerts validation
 
-### 3. Тестирование отказоустойчивости
-- Симуляция сбоев сети
-- Тестирование восстановления после сбоев
-- Проверка circuit breaker логики
+### 3. Fault Tolerance Testing
+- Network failure simulation
+- Recovery testing after failures
+- Circuit breaker logic verification
 
-### 4. Бенчмарки производительности
+### 4. Performance Benchmarks
 ```go
 func BenchmarkBitswapHighLoad(b *testing.B) {
-    // Тест производительности Bitswap под нагрузкой
+    // Bitswap performance test under load
 }
 
 func BenchmarkBlockstoreBatchOperations(b *testing.B) {
-    // Тест батчевых операций блочного хранилища
+    // Blockstore batch operations test
 }
 
 func BenchmarkNetworkOptimization(b *testing.B) {
-    // Тест сетевых оптимизаций
+    // Network optimization test
 }
 ```
 
-### Критерии производительности
-- Время отклика < 100ms для 95% запросов
-- Пропускная способность > 10,000 запросов/сек
-- Использование памяти стабильно в течение 24+ часов
-- CPU утилизация < 80% при пиковой нагрузке
-- Сетевая латентность < 50ms между узлами кластера
+### Performance Criteria
+- Response time < 100ms for 95% of requests
+- Throughput > 10,000 requests/sec
+- Memory usage stable for 24+ hours
+- CPU utilization < 80% at peak load
+- Network latency < 50ms between cluster nodes

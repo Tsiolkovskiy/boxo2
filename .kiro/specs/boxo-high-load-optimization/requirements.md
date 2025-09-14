@@ -1,84 +1,84 @@
-# Требования к оптимизации Boxo для высокой нагрузки
+# Boxo High Load Optimization Requirements
 
-## Введение
+## Introduction
 
-Данная спецификация описывает требования к оптимизации библиотеки Boxo для эффективной работы под высокой нагрузкой в составе IPFS-cluster. Оптимизация направлена на повышение производительности, масштабируемости и стабильности системы при обработке большого количества одновременных запросов и операций с данными.
+This specification describes the requirements for optimizing the Boxo library for efficient operation under high load as part of an IPFS-cluster. The optimization aims to improve performance, scalability, and system stability when processing large numbers of concurrent requests and data operations.
 
-## Требования
+## Requirements
 
-### Требование 1: Оптимизация Bitswap для высокой пропускной способности
+### Requirement 1: Bitswap Optimization for High Throughput
 
-**Пользовательская история:** Как администратор IPFS-cluster, я хочу, чтобы Bitswap эффективно обрабатывал тысячи одновременных запросов блоков, чтобы кластер мог обслуживать большое количество клиентов без деградации производительности.
+**User Story:** As an IPFS-cluster administrator, I want Bitswap to efficiently handle thousands of concurrent block requests, so that the cluster can serve a large number of clients without performance degradation.
 
-#### Критерии приемки
+#### Acceptance Criteria
 
-1. КОГДА система получает более 1000 одновременных запросов блоков ТОГДА Bitswap ДОЛЖЕН поддерживать время отклика менее 100мс для 95% запросов
-2. КОГДА нагрузка превышает 10000 запросов в секунду ТОГДА система ДОЛЖНА автоматически масштабировать пулы соединений
-3. КОГДА происходит пиковая нагрузка ТОГДА система ДОЛЖНА приоритизировать критически важные запросы
-4. ЕСЛИ память превышает 80% от доступной ТОГДА система ДОЛЖНА активировать механизмы сброса кэша
+1. WHEN the system receives more than 1000 concurrent block requests THEN Bitswap SHALL maintain response time under 100ms for 95% of requests
+2. WHEN load exceeds 10000 requests per second THEN the system SHALL automatically scale connection pools
+3. WHEN peak load occurs THEN the system SHALL prioritize critically important requests
+4. IF memory exceeds 80% of available THEN the system SHALL activate cache eviction mechanisms
 
-### Требование 2: Оптимизация блочного хранилища для массовых операций
+### Requirement 2: Blockstore Optimization for Bulk Operations
 
-**Пользовательская история:** Как разработчик приложения, я хочу, чтобы блочное хранилище эффективно обрабатывало массовые операции записи и чтения, чтобы мое приложение могло быстро синхронизировать большие объемы данных.
+**User Story:** As an application developer, I want the blockstore to efficiently handle bulk read and write operations, so that my application can quickly synchronize large volumes of data.
 
-#### Критерии приемки
+#### Acceptance Criteria
 
-1. КОГДА выполняется пакетная запись более 1000 блоков ТОГДА система ДОЛЖНА использовать транзакционные операции для повышения производительности
-2. КОГДА происходит одновременное чтение множества блоков ТОГДА система ДОЛЖНА группировать запросы для оптимизации I/O
-3. ЕСЛИ размер блока превышает 1MB ТОГДА система ДОЛЖНА использовать потоковую обработку
-4. КОГДА кэш блоков заполнен ТОГДА система ДОЛЖНА использовать LRU-алгоритм с учетом частоты доступа
+1. WHEN performing batch writes of more than 1000 blocks THEN the system SHALL use transactional operations to improve performance
+2. WHEN concurrent reading of multiple blocks occurs THEN the system SHALL group requests to optimize I/O
+3. IF block size exceeds 1MB THEN the system SHALL use streaming processing
+4. WHEN block cache is full THEN the system SHALL use LRU algorithm with access frequency consideration
 
-### Требование 3: Оптимизация сетевого слоя для кластерной среды
+### Requirement 3: Network Layer Optimization for Cluster Environment
 
-**Пользовательская история:** Как оператор кластера, я хочу, чтобы сетевые соединения между узлами кластера были оптимизированы для минимизации латентности и максимизации пропускной способности.
+**User Story:** As a cluster operator, I want network connections between cluster nodes to be optimized to minimize latency and maximize throughput.
 
-#### Критерии приемки
+#### Acceptance Criteria
 
-1. КОГДА устанавливается соединение между узлами кластера ТОГДА система ДОЛЖНА использовать пулы постоянных соединений
-2. КОГДА обнаруживается высокая латентность ТОГДА система ДОЛЖНА автоматически переключаться на альтернативные маршруты
-3. ЕСЛИ соединение простаивает более 30 секунд ТОГДА система ДОЛЖНА отправлять keep-alive пакеты
-4. КОГДА пропускная способность падает ниже порога ТОГДА система ДОЛЖНА адаптивно настраивать размеры буферов
+1. WHEN establishing connections between cluster nodes THEN the system SHALL use persistent connection pools
+2. WHEN high latency is detected THEN the system SHALL automatically switch to alternative routes
+3. IF connection is idle for more than 30 seconds THEN the system SHALL send keep-alive packets
+4. WHEN throughput drops below threshold THEN the system SHALL adaptively adjust buffer sizes
 
-### Требование 4: Мониторинг и метрики производительности
+### Requirement 4: Performance Monitoring and Metrics
 
-**Пользовательская история:** Как администратор системы, я хочу получать детальные метрики производительности в реальном времени, чтобы быстро выявлять и устранять узкие места.
+**User Story:** As a system administrator, I want to receive detailed performance metrics in real-time, so that I can quickly identify and resolve bottlenecks.
 
-#### Критерии приемки
+#### Acceptance Criteria
 
-1. КОГДА система работает ТОГДА она ДОЛЖНА экспортировать метрики через Prometheus endpoint
-2. КОГДА производительность деградирует ТОГДА система ДОЛЖНА генерировать алерты с детальной диагностикой
-3. ЕСЛИ время отклика превышает SLA ТОГДА система ДОЛЖНА логировать трассировку запроса
-4. КОГДА происходят ошибки ТОГДА система ДОЛЖНА предоставлять структурированные логи с контекстом
+1. WHEN the system is running THEN it SHALL export metrics through Prometheus endpoint
+2. WHEN performance degrades THEN the system SHALL generate alerts with detailed diagnostics
+3. IF response time exceeds SLA THEN the system SHALL log request tracing
+4. WHEN errors occur THEN the system SHALL provide structured logs with context
 
-### Требование 5: Управление памятью и ресурсами
+### Requirement 5: Memory and Resource Management
 
-**Пользовательская история:** Как системный администратор, я хочу, чтобы система эффективно управляла памятью и не допускала утечек при длительной работе под нагрузкой.
+**User Story:** As a system administrator, I want the system to efficiently manage memory and prevent leaks during long-term operation under load.
 
-#### Критерии приемки
+#### Acceptance Criteria
 
-1. КОГДА система работает более 24 часов под нагрузкой ТОГДА потребление памяти НЕ ДОЛЖНО увеличиваться более чем на 5%
-2. КОГДА достигается лимит памяти ТОГДА система ДОЛЖНА активировать graceful degradation
-3. ЕСЛИ обнаруживается утечка памяти ТОГДА система ДОЛЖНА автоматически перезапускать проблемные компоненты
-4. КОГДА нагрузка снижается ТОГДА система ДОЛЖНА освобождать неиспользуемые ресурсы
+1. WHEN the system runs for more than 24 hours under load THEN memory consumption SHALL NOT increase by more than 5%
+2. WHEN memory limit is reached THEN the system SHALL activate graceful degradation
+3. IF memory leak is detected THEN the system SHALL automatically restart problematic components
+4. WHEN load decreases THEN the system SHALL release unused resources
 
-### Требование 6: Конфигурируемость и тюнинг
+### Requirement 6: Configurability and Tuning
 
-**Пользовательская история:** Как DevOps инженер, я хочу иметь возможность тонко настраивать параметры производительности для различных сценариев нагрузки.
+**User Story:** As a DevOps engineer, I want to be able to fine-tune performance parameters for different load scenarios.
 
-#### Критерии приемки
+#### Acceptance Criteria
 
-1. КОГДА изменяются параметры конфигурации ТОГДА система ДОЛЖНА применять их без перезапуска
-2. КОГДА обнаруживается новый паттерн нагрузки ТОГДА система ДОЛЖНА предлагать оптимальные настройки
-3. ЕСЛИ конфигурация некорректна ТОГДА система ДОЛЖНА валидировать параметры и предупреждать об ошибках
-4. КОГДА система работает в разных средах ТОГДА она ДОЛЖНА автоматически адаптировать настройки по умолчанию
+1. WHEN configuration parameters change THEN the system SHALL apply them without restart
+2. WHEN new load pattern is detected THEN the system SHALL suggest optimal settings
+3. IF configuration is incorrect THEN the system SHALL validate parameters and warn about errors
+4. WHEN system operates in different environments THEN it SHALL automatically adapt default settings
 
-### Требование 7: Отказоустойчивость при высокой нагрузке
+### Requirement 7: Fault Tolerance Under High Load
 
-**Пользовательская история:** Как архитектор системы, я хочу, чтобы система сохраняла стабильность и продолжала обслуживать критически важные запросы даже при экстремальной нагрузке.
+**User Story:** As a system architect, I want the system to maintain stability and continue serving critically important requests even under extreme load.
 
-#### Критерии приемки
+#### Acceptance Criteria
 
-1. КОГДА нагрузка превышает проектную мощность ТОГДА система ДОЛЖНА применять circuit breaker паттерн
-2. КОГДА один из узлов кластера недоступен ТОГДА система ДОЛЖНА автоматически перераспределять нагрузку
-3. ЕСЛИ происходит каскадный отказ ТОГДА система ДОЛЖНА изолировать проблемные компоненты
-4. КОГДА система восстанавливается после сбоя ТОГДА она ДОЛЖНА постепенно увеличивать нагрузку
+1. WHEN load exceeds design capacity THEN the system SHALL apply circuit breaker pattern
+2. WHEN one cluster node is unavailable THEN the system SHALL automatically redistribute load
+3. IF cascading failure occurs THEN the system SHALL isolate problematic components
+4. WHEN system recovers from failure THEN it SHALL gradually increase load
